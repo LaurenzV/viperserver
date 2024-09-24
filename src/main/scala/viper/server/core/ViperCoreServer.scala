@@ -13,10 +13,12 @@ import ch.qos.logback.classic.Logger
 import viper.server.ViperConfig
 import viper.server.vsi.{AstHandle, AstJobId, VerJobId, VerificationServer}
 import viper.silver.ast.Program
+import viper.silver.ast.pretty.FastPrettyPrinter
 import viper.silver.logger.ViperLogger
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.duration._
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
 
 abstract class ViperCoreServer(val config: ViperConfig)(implicit val executor: VerificationExecutionContext) extends VerificationServer with ViperPost {
@@ -71,6 +73,26 @@ abstract class ViperCoreServer(val config: ViperConfig)(implicit val executor: V
         s"The maximum number of active verification jobs are currently running (${ver_jobs.MAX_ACTIVE_JOBS}).")
     }
     ast_id
+  }
+
+  def reformatWithAstJob(ast_id: AstJobId, localLogger: Option[Logger] = None): Option[String] = {
+    val logger = combineLoggers(localLogger)
+
+    ast_jobs.lookupJob(ast_id)
+      .map(handle_future => {
+        val future = handle_future.map((handle: AstHandle[Option[Program]]) => {
+            val program_maybe_fut: Future[Option[Program]] = handle.artifact
+            program_maybe_fut.map(p => p.map(
+              p => p.toString()
+            )).recover({
+              case e: Throwable =>
+                logger.error(s"### An exception has occurred while constructing Viper AST: $e")
+                throw e
+            })
+          }).flatten
+
+        Await.result(future, Duration.create(1.0, TimeUnit.SECONDS))
+    }).flatten
   }
 
   def verifyWithAstJob(programId: String, ast_id: AstJobId, backend_config: ViperBackendConfig, localLogger: Option[Logger] = None): VerJobId = {

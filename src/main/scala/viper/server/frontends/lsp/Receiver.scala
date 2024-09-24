@@ -170,7 +170,8 @@ class CustomReceiver(config: ViperConfig, server: ViperServerService, serverUrl:
 
   @JsonNotification(C2S_Commands.Reformat)
   def onReformat(data: ReformatParams): Unit = {
-    coordinator.logger.info("got reformat command")
+    coordinator.logger.info("On reformat")
+    coordinator.reformatFile(data.uri)
   }
 
   @JsonNotification(C2S_Commands.Verify)

@@ -57,6 +57,15 @@ class ViperServerService(config: ViperConfig)(override implicit val executor: Ve
     ver_id
   }
 
+  def reformatFile(file: String, localLogger: Option[Logger] = None): Unit = {
+    val logger = combineLoggers(localLogger)
+    logger.debug("Requesting ViperServer to create a reformatted file.");
+
+    val ast_id = requestAst(file :: Nil, localLogger)
+    val formatted = reformatWithAstJob(ast_id, localLogger).get
+    println(s"$formatted")
+  }
+
   def startStreaming(jid: VerJobId, relayActor_props: Props, localLogger: Option[Logger] = None): Unit = {
     val logger = combineLoggers(localLogger)
     logger.debug("Sending verification request to ViperServer...")
