@@ -104,11 +104,10 @@ class FileManager(coordinator: ClientCoordinator, file_uri: String)(implicit exe
     s"$backendClassName $customArgs"
   }
 
-  def reformatFile(): Boolean = {
+  def reformatFile(): Future[Option[String]] = {
     coordinator.logger.info(s"reformatting the file $filename")
     println(s"starting reformat...");
     coordinator.server.reformatFile(path.toString, Some(coordinator.localLogger))
-    true
   }
 
   def startVerification(backendClassName: String, customArgs: String, manuallyTriggered: Boolean): Boolean = {

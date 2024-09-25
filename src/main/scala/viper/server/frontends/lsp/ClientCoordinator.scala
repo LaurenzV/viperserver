@@ -138,9 +138,8 @@ class ClientCoordinator(val server: ViperServerService)(implicit executor: Verif
     })
   }
 
-  def reformatFile(uri: String): Boolean  = {
-    Option(_files.get(uri))
-      .exists(fm => fm.reformatFile())
+  def reformatFile(uri: String): Future[Option[String]]  = {
+    _files.get(uri).reformatFile()
   }
 
   /** returns true if verification was started */

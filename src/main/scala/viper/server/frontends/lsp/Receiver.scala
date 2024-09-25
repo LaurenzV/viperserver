@@ -15,8 +15,8 @@ import viper.server.core.VerificationExecutionContext
 import viper.viperserver.BuildInfo
 
 import scala.annotation.unused
-import scala.concurrent.Future
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.{Duration, DurationInt}
 import scala.jdk.FutureConverters._
 import scala.language.postfixOps
 
@@ -168,10 +168,12 @@ class CustomReceiver(config: ViperConfig, server: ViperServerService, serverUrl:
     CompletableFuture.completedFuture(GetLanguageServerUrlResponse(serverUrl))
   }
 
-  @JsonNotification(C2S_Commands.Reformat)
-  def onReformat(data: ReformatParams): Unit = {
+  @JsonRequest(C2S_Commands.Reformat)
+  def onReformat(data: ReformatParams): CompletionStage[Option[String]] = {
     coordinator.logger.info("On reformat")
-    coordinator.reformatFile(data.uri)
+    val result = Await.result(coordinator.reformatFile(data.uri), Duration.Inf);
+    println(s"result: $result");
+    CompletableFuture.completedFuture(result)
   }
 
   @JsonNotification(C2S_Commands.Verify)

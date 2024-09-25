@@ -75,12 +75,15 @@ abstract class ViperCoreServer(val config: ViperConfig)(implicit val executor: V
     ast_id
   }
 
-  def reformatWithAstJob(ast_id: AstJobId, localLogger: Option[Logger] = None): Option[String] = {
+  def reformatWithAstJob(ast_id: AstJobId, localLogger: Option[Logger] = None): Future[Option[String]] = {
     val logger = combineLoggers(localLogger)
+    val res = ast_jobs.lookupJob(ast_id).isDefined;
+
+    println(s"let's inspect $res")
 
     ast_jobs.lookupJob(ast_id)
       .map(handle_future => {
-        val future = handle_future.map((handle: AstHandle[Option[Program]]) => {
+        handle_future.map((handle: AstHandle[Option[Program]]) => {
             val program_maybe_fut: Future[Option[Program]] = handle.artifact
             program_maybe_fut.map(p => p.map(
               p => p.toString()
@@ -91,8 +94,7 @@ abstract class ViperCoreServer(val config: ViperConfig)(implicit val executor: V
             })
           }).flatten
 
-        Await.result(future, Duration.create(1.0, TimeUnit.SECONDS))
-    }).flatten
+    }).get
   }
 
   def verifyWithAstJob(programId: String, ast_id: AstJobId, backend_config: ViperBackendConfig, localLogger: Option[Logger] = None): VerJobId = {
