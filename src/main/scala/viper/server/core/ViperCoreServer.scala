@@ -86,7 +86,12 @@ abstract class ViperCoreServer(val config: ViperConfig)(implicit val executor: V
         handle_future.map((handle: AstHandle[Option[Program]]) => {
             val program_maybe_fut: Future[Option[Program]] = handle.artifact
             program_maybe_fut.map(p => p.map(
-              p => p.toString()
+              p => {
+                val result = p.toString();
+                // TODO: Figure out why this is needed.
+                ast_jobs.discardJob(ast_id);
+                result
+              }
             )).recover({
               case e: Throwable =>
                 logger.error(s"### An exception has occurred while constructing Viper AST: $e")

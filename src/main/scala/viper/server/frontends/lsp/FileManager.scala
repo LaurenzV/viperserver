@@ -106,7 +106,6 @@ class FileManager(coordinator: ClientCoordinator, file_uri: String)(implicit exe
 
   def reformatFile(): Future[Option[String]] = {
     coordinator.logger.info(s"reformatting the file $filename")
-    println(s"starting reformat...");
     coordinator.server.reformatFile(path.toString, Some(coordinator.localLogger))
   }
 
