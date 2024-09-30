@@ -113,9 +113,7 @@ trait VerificationServer extends Post {
           val job_actor = system.actorOf(JobActor.props(new_jid), s"${pool.tag}_job_actor_${new_jid}")
 
           /** Register cleanup task. */
-          println(s"registering cleanup task ${queue}");
           queue.watchCompletion().onComplete(_ => {
-            println(s"got completed signal for ${queue}");
             pool.discardJob(new_jid)
             /** FIXME: if the job actors are meant to be reused from one phase to another (not implemented yet),
               * FIXME: then they should be stopped only after the **last** job is completed in the pipeline. */
