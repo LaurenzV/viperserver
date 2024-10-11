@@ -13,6 +13,7 @@ import akka.util.Timeout
 import ch.qos.logback.classic.Logger
 import viper.server.ViperConfig
 import viper.server.core.{VerificationExecutionContext, ViperBackendConfig, ViperCoreServer}
+import viper.server.utility.AstGenerator
 import viper.server.utility.Helpers.{getArgListFromArgString, validateViperFile}
 import viper.server.vsi.VerificationProtocol.{StopAstConstruction, StopVerification}
 import viper.server.vsi.{AstJobId, DefaultVerificationServerStart, VerHandle, VerJobId}
@@ -57,12 +58,12 @@ class ViperServerService(config: ViperConfig)(override implicit val executor: Ve
     ver_id
   }
 
-  def reformatFile(file: String, localLogger: Option[Logger] = None): Future[Option[String]] = {
+  def reformatFile(file: String, localLogger: Option[Logger] = None): Option[String] = {
     val logger = combineLoggers(localLogger)
     logger.debug("Requesting ViperServer to create a reformatted file.");
 
-    val ast_id = requestAst(file :: Nil, localLogger)
-    reformatWithAstJob(ast_id, localLogger)
+    val ast_generator = new AstGenerator(logger);
+    ast_generator.generateViperParseAst(file).map(p => p.reformatted)
   }
 
   def startStreaming(jid: VerJobId, relayActor_props: Props, localLogger: Option[Logger] = None): Unit = {

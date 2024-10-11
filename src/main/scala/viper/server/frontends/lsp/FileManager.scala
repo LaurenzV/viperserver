@@ -104,7 +104,7 @@ class FileManager(coordinator: ClientCoordinator, file_uri: String)(implicit exe
     s"$backendClassName $customArgs"
   }
 
-  def reformatFile(): Future[Option[String]] = {
+  def reformatFile(): Option[String] = {
     coordinator.logger.info(s"reformatting the file $filename")
     coordinator.server.reformatFile(path.toString, Some(coordinator.localLogger))
   }

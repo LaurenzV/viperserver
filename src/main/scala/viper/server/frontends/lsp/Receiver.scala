@@ -171,7 +171,7 @@ class CustomReceiver(config: ViperConfig, server: ViperServerService, serverUrl:
   @JsonRequest(C2S_Commands.Reformat)
   def onReformat(data: ReformatParams): CompletionStage[Option[String]] = {
     coordinator.logger.info("On reformat")
-    val result = Await.result(coordinator.reformatFile(data.uri), Duration.Inf);
+    val result = coordinator.reformatFile(data.uri);
     CompletableFuture.completedFuture(result)
   }
 

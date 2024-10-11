@@ -138,7 +138,7 @@ class ClientCoordinator(val server: ViperServerService)(implicit executor: Verif
     })
   }
 
-  def reformatFile(uri: String): Future[Option[String]]  = {
+  def reformatFile(uri: String): Option[String] = {
     _files.get(uri).reformatFile()
   }
 

@@ -11,6 +11,7 @@ import akka.actor.ActorRef
 import akka.util.Timeout
 import ch.qos.logback.classic.Logger
 import viper.server.ViperConfig
+import viper.server.utility.AstGenerator
 import viper.server.vsi.{AstHandle, AstJobId, VerJobId, VerificationServer}
 import viper.silver.ast.Program
 import viper.silver.ast.pretty.FastPrettyPrinter
@@ -73,33 +74,6 @@ abstract class ViperCoreServer(val config: ViperConfig)(implicit val executor: V
         s"The maximum number of active verification jobs are currently running (${ver_jobs.MAX_ACTIVE_JOBS}).")
     }
     ast_id
-  }
-
-  def reformatWithAstJob(ast_id: AstJobId, localLogger: Option[Logger] = None): Future[Option[String]] = {
-    val logger = combineLoggers(localLogger)
-    val res = ast_jobs.lookupJob(ast_id).isDefined;
-
-    println(s"let's inspect $res")
-
-    ast_jobs.lookupJob(ast_id)
-      .map(handle_future => {
-        handle_future.map((handle: AstHandle[Option[Program]]) => {
-            val program_maybe_fut: Future[Option[Program]] = handle.artifact
-            program_maybe_fut.map(p => p.map(
-              p => {
-                val result = p.toString();
-                // TODO: Figure out why this is needed.
-                ast_jobs.discardJob(ast_id);
-                result
-              }
-            )).recover({
-              case e: Throwable =>
-                logger.error(s"### An exception has occurred while constructing Viper AST: $e")
-                throw e
-            })
-          }).flatten
-
-    }).get
   }
 
   def verifyWithAstJob(programId: String, ast_id: AstJobId, backend_config: ViperBackendConfig, localLogger: Option[Logger] = None): VerJobId = {

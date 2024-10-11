@@ -155,7 +155,6 @@ trait VerificationServer extends Post {
       throw new IllegalStateException("Instance of VerificationServer already stopped")
     }
 
-    println(s"new job allowed?: ${ast_jobs.newJobsAllowed}, ${ast_jobs.jobHandles.size}");
     if (ast_jobs.newJobsAllowed) {
       initializeProcess(ast_jobs, Future.successful(Some(task)))
     } else {
