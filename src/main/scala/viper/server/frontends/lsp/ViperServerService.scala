@@ -63,7 +63,9 @@ class ViperServerService(config: ViperConfig)(override implicit val executor: Ve
     logger.debug("Requesting ViperServer to create a reformatted file.");
 
     val ast_generator = new AstGenerator(logger);
-    ast_generator.generateViperParseAst(file).map(p => p.reformatted)
+    val parse_ast = ast_generator.generateViperParseAst(file);
+    println(s"$parse_ast");
+    parse_ast.map(p => p.reformatted)
   }
 
   def startStreaming(jid: VerJobId, relayActor_props: Props, localLogger: Option[Logger] = None): Unit = {
