@@ -67,6 +67,8 @@ class ViperServerService(config: ViperConfig)(override implicit val executor: Ve
     parse_ast.map(p => {
       var reformatted = "";
 
+      println(s"Program: $p");
+
       for (member <- p.members) {
         reformatted = reformatted + member.reformat + "\n\n";
       }
