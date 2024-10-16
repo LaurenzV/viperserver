@@ -73,6 +73,8 @@ class ViperServerService(config: ViperConfig)(override implicit val executor: Ve
         reformatted = reformatted + member.reformat + "\n\n";
       }
 
+      println(s"Comments: ${p.comments}")
+
       reformatted
     })
   }
