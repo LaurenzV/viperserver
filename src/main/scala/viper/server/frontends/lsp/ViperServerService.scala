@@ -17,6 +17,8 @@ import viper.server.utility.AstGenerator
 import viper.server.utility.Helpers.{getArgListFromArgString, validateViperFile}
 import viper.server.vsi.VerificationProtocol.{StopAstConstruction, StopVerification}
 import viper.server.vsi.{AstJobId, DefaultVerificationServerStart, VerHandle, VerJobId}
+import viper.silver.ast.{FilePosition, HasLineColumn, SourcePosition}
+import viper.silver.parser.{Reformattable, Where}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -69,8 +71,14 @@ class ViperServerService(config: ViperConfig)(override implicit val executor: Ve
 
       println(s"Program: $p");
 
-      for (member <- p.members) {
-        reformatted = reformatted + member.reformat + "\n\n";
+      val elements = (p.comments ++ p.members).sortBy(el => el.pos match {
+        case (slc: FilePosition, _) => (slc.line, slc.column)
+        case _ => (0, 0)
+      });
+
+      for (element <- elements) {
+        println(s"${element.pos}");
+        reformatted += element.reformat + "\n";
       }
 
       println(s"Comments: ${p.comments}")
