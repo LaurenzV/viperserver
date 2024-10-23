@@ -17,8 +17,9 @@ import viper.server.utility.AstGenerator
 import viper.server.utility.Helpers.{getArgListFromArgString, validateViperFile}
 import viper.server.vsi.VerificationProtocol.{StopAstConstruction, StopVerification}
 import viper.server.vsi.{AstJobId, DefaultVerificationServerStart, VerHandle, VerJobId}
+import viper.silver.ast.pretty.FastPrettyPrinter
 import viper.silver.ast.{FilePosition, HasLineColumn, SourcePosition}
-import viper.silver.parser.{Reformattable, Where}
+import viper.silver.parser.ReformatPrettyPrinter
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -66,23 +67,19 @@ class ViperServerService(config: ViperConfig)(override implicit val executor: Ve
 
     val ast_generator = new AstGenerator(logger);
     val parse_ast = ast_generator.generateViperParseAst(file);
+    println(parse_ast);
     parse_ast.map(p => {
       var reformatted = "";
-
-      println(s"Program: $p");
-
       val elements = (p.comments ++ p.members).sortBy(el => el.pos match {
         case (slc: FilePosition, _) => (slc.line, slc.column)
         case _ => (0, 0)
       });
 
       for (element <- elements) {
-        println(s"${element.pos}");
-        reformatted += element.reformat + "\n";
+        reformatted += ReformatPrettyPrinter.pretty(element) + "\n";
       }
 
-      println(s"Comments: ${p.comments}")
-
+//      println(reformatted);
       reformatted
     })
   }
