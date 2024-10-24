@@ -67,21 +67,7 @@ class ViperServerService(config: ViperConfig)(override implicit val executor: Ve
 
     val ast_generator = new AstGenerator(logger);
     val parse_ast = ast_generator.generateViperParseAst(file);
-    println(parse_ast);
-    parse_ast.map(p => {
-      var reformatted = "";
-      val elements = (p.comments ++ p.members).sortBy(el => el.pos match {
-        case (slc: FilePosition, _) => (slc.line, slc.column)
-        case _ => (0, 0)
-      });
-
-      for (element <- elements) {
-        reformatted += ReformatPrettyPrinter.pretty(element) + "\n";
-      }
-
-//      println(reformatted);
-      reformatted
-    })
+    parse_ast.map(a => ReformatPrettyPrinter.reformat(a))
   }
 
   def startStreaming(jid: VerJobId, relayActor_props: Props, localLogger: Option[Logger] = None): Unit = {
